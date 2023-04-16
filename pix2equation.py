@@ -10,11 +10,11 @@ from constants import *
 
 
 class BasicModel:
-    def __init__(self, input_shape, output_size, output_path):
+    def __init__(self, input_shape, output_size, output_dir):
         self.model = None
         self.input_shape = input_shape
         self.output_size = output_size
-        self.output_path = output_path
+        self.output_path = output_dir
         self.name = ""
 
     def save(self):
@@ -30,9 +30,9 @@ class BasicModel:
         self.model = model_from_json(loaded_model_json)
         self.model.load_weights("{}/{}.h5".format(self.output_path, output_name))
 
-class pix2euqation(BasicModel):
-    def __init__(self, input_shape, output_size, output_path):
-        super().__init__(self, input_shape, output_size, output_path)
+class pix2equation(BasicModel):
+    def __init__(self, input_shape, output_size, output_dir):
+        super().__init__(input_shape, output_size, output_dir)
         self.name = "pix2equation"
         image_model = Sequential()
         image_model.add(Conv2D(32, (3, 3), padding='valid', activation='relu', input_shape=input_shape))
@@ -75,14 +75,16 @@ class pix2euqation(BasicModel):
 
         self.model = Model(inputs=[visual_input, textual_input], outputs=decoder)
 
-        optimizer = RMSprop(lr=0.0001, clipvalue=1.0)
+        optimizer = RMSprop(learning_rate=0.0001, clipvalue=1.0)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer)
-    def fit(self, images, partial_captions, next_words):
-        self.model.fit([images, partial_captions], next_words, shuffle=False, epochs=EPOCHS, batch_size=BATCH_SIZE, verbose=1)
-        self.save()
-
-    def fit_generator(self, generator, steps_per_epoch):
-        self.model.fit_generator(generator, steps_per_epoch=steps_per_epoch, epochs=EPOCHS, verbose=1)
+    def fit(self, train_generator, batch_size, steps_per_epoch, valid_generator, validation_steps, checkpoint):
+        self.model.fit(train_generator, 
+              batch_size=batch_size,
+              steps_per_epoch=steps_per_epoch,
+              validation_data=valid_generator,
+              validation_steps=2,
+              callbacks=[checkpoint],
+              verbose=1)
         self.save()
 
     def predict(self, image, partial_caption):

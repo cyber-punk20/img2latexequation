@@ -1,7 +1,20 @@
 DATA_DIR = './dataset_tmp/training_56'
 VOCAB_DIR = './dataset_tmp/step2'
-PNG_DIR = './dataset_tmp/formula_images'
-PNG_NPZ_DIR = './dataset_tmp/formula_images_npz'
+IMG_DIR = './dataset_tmp/formula_images'
+IMG_NPZ_DIR = './dataset_tmp/formula_images_npz'
+
+TRAIN_DATASET_INFO_PATH = './dataset_tmp/train_dataset.json'
+TEST_DATASET_INFO_PATH = './dataset_tmp/test_dataset.json'
+VALID_DATASET_INFO_PATH = './dataset_tmp/valid_dataset.json'
+
+
+TRAIN_DATASET_DIR = './dataset_tmp/train_dataset'
+TEST_DATASET_DIR = './dataset_tmp/test_dataset'
+VALID_DATASET_DIR = './dataset_tmp/valid_dataset'
+
+MODEL_DIR = './models/'
+CHECKPOINT_PATH = './models/model_checkpoint.h5'
+
 WORD2ID_FILENAME = 'dict_vocab.pkl'
 ID2WORD_FILENAME = 'dict_id2word.pkl'
 BATCH_SIZE = 56
