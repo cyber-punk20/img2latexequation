@@ -75,17 +75,29 @@ class pix2equation(BasicModel):
 
         self.model = Model(inputs=[visual_input, textual_input], outputs=decoder)
 
-        optimizer = RMSprop(learning_rate=0.0001, clipvalue=1.0)
+        optimizer = RMSprop(learning_rate=0.0003, clipvalue=1.0)
         self.model.compile(loss='categorical_crossentropy', optimizer=optimizer)
+
     def fit(self, train_generator, batch_size, steps_per_epoch, valid_generator, validation_steps, checkpoint):
         self.model.fit(train_generator, 
               batch_size=batch_size,
               steps_per_epoch=steps_per_epoch,
               validation_data=valid_generator,
-              validation_steps=2,
+              validation_steps=validation_steps,
               callbacks=[checkpoint],
               verbose=1)
         self.save()
+
+    # def fit(self, images, partial_captions, next_words, batch_size, steps_per_epoch, v_images, v_partial_captions, v_next_words, validation_steps, checkpoint):
+    #     self.model.fit([images, partial_captions], 
+    #                     next_words,
+    #                     batch_size=batch_size,
+    #                     steps_per_epoch=steps_per_epoch,
+    #                     validation_data=([v_images, v_partial_captions], v_next_words),
+    #                     validation_steps=validation_steps,
+    #                     callbacks=[checkpoint],
+    #                     verbose=1)
+    #     self.save()
 
     def predict(self, image, partial_caption):
         return self.model.predict([image, partial_caption], verbose=0)[0]

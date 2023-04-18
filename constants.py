@@ -1,11 +1,11 @@
 DATA_DIR = './dataset_tmp/training_56'
 VOCAB_DIR = './dataset_tmp/step2'
 IMG_DIR = './dataset_tmp/formula_images'
-IMG_NPZ_DIR = './dataset_tmp/formula_images_npz'
+IMG_NPZ_DIR = './dataset_tmp/formula_images_npz_128'
 
-TRAIN_DATASET_INFO_PATH = './dataset_tmp/train_dataset.json'
-TEST_DATASET_INFO_PATH = './dataset_tmp/test_dataset.json'
-VALID_DATASET_INFO_PATH = './dataset_tmp/valid_dataset.json'
+TRAIN_DATASET_INFO_PATH = './dataset_tmp/train_dataset_128.json'
+TEST_DATASET_INFO_PATH = './dataset_tmp/test_dataset_128.json'
+VALID_DATASET_INFO_PATH = './dataset_tmp/valid_dataset_128.json'
 
 
 TRAIN_DATASET_DIR = './dataset_tmp/train_dataset'
@@ -23,7 +23,6 @@ UNIQUE_IDX_OFFSET = 2000000
 
 # CONFIG FOR MODEL
 CONTEXT_LENGTH = 48
-IMG_SIZE = 256
-BATCH_SIZE = 56
+IMG_SIZE = 128
 EPOCHS = 10
 STEPS_PER_EPOCH = 72000

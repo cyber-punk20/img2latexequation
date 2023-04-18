@@ -10,6 +10,47 @@ from tensorflow.keras.utils import Sequence
 
 class Generator:
     @staticmethod
+    def generate_dataset(df, input_shape, batch_size,  
+                         img_npz_path=IMG_NPZ_DIR):
+        dataset = Dataset()
+        dataset.voc.loadVolcabulary()
+        dataset.voc.create_binary_representation()
+
+        input_images = []
+        partial_sequences = []
+        next_words = []
+
+        for index, row in df.iterrows():
+            image = row['image']
+            image_name = image[:image.find(".png")]
+            if os.path.isfile("{}/{}.npz".format(img_npz_path, image_name)):
+                img = np.load("{}/{}.npz".format(img_npz_path, image_name))["features"]
+                pad_width = ((0, input_shape[0] - img.shape[0]), (0, 0), (0, 0))
+                img = np.pad(img, pad_width, mode='constant')
+            else:
+                continue
+            equ_token_id_seq = row['squashed_seq']
+            token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
+            token_id_sequence.extend(equ_token_id_seq)
+            token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
+            suffix = [dataset.voc.vocabulary[PLACEHOLDER]] * CONTEXT_LENGTH
+
+            a = np.concatenate([suffix, token_id_sequence])
+            for j in range(0, len(a) - CONTEXT_LENGTH):
+                context_ids = a[j:j + CONTEXT_LENGTH]
+                label_id = a[j + CONTEXT_LENGTH]
+
+                input_images.append(img)
+                partial_sequences.append(context_ids)
+                next_words.append(label_id)
+
+        next_words = Dataset.sparsify_labels(next_words, dataset.voc)
+        partial_sequences = Dataset.binarize(partial_sequences, dataset.voc)
+        input_images = np.array(input_images)
+        partial_sequences = np.array(partial_sequences)
+        next_words = np.array(next_words)
+        return (input_images, partial_sequences, next_words)
+    @staticmethod
     def data_generator(df, input_shape, batch_size,  
                        img_npz_path=IMG_NPZ_DIR,
                        verbose=False, loop_only_one=False):

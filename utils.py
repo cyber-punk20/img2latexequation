@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 from constants import *
 from preprocessing import Dataset
+
+
 def check_png_size(path):
     """
     Check if all PNG files under the directory have the same size.
@@ -33,22 +35,38 @@ def check_png_size(path):
     return True
 
 
+# def convert_imgs_npz(input_path, output_path):
+#     for f in os.listdir(input_path):
+#         if f.find(".png") != -1:
+#             file_name = f[:f.find(".png")]
+#             if os.path.exists("{}/{}.npz".format(output_path, file_name)):
+#                 continue
+#             img = Dataset.get_preprocessed_img("{}/{}".format(input_path, f), IMG_SIZE)
+#             if img is None:
+#                 continue
+#             np.savez_compressed("{}/{}".format(output_path, file_name), features=img)
+#             retrieve = np.load("{}/{}.npz".format(output_path, file_name))["features"]
+
+#             assert np.array_equal(img, retrieve)
+
+#     print("Numpy arrays saved in {}".format(output_path))
+
 def convert_imgs_npz(input_path, output_path):
+    os.makedirs(output_path, exist_ok=True)
     for f in os.listdir(input_path):
-        if f.find(".png") != -1:
+        if f.endswith(".png"):
             file_name = f[:f.find(".png")]
-            if os.path.exists("{}/{}.npz".format(output_path, file_name)):
+            output_file = os.path.join(output_path, f"{file_name}.npz")
+            if os.path.exists(output_file):
                 continue
-            img = Dataset.get_preprocessed_img("{}/{}".format(input_path, f), IMG_SIZE)
+            img = Dataset.get_preprocessed_img(os.path.join(input_path, f), IMG_SIZE)
             if img is None:
                 continue
-
-            np.savez_compressed("{}/{}".format(output_path, file_name), features=img)
-            retrieve = np.load("{}/{}.npz".format(output_path, file_name))["features"]
-
+            np.savez_compressed(output_file, features=img)
+            retrieve = np.load(output_file)["features"]
             assert np.array_equal(img, retrieve)
+    print("Numpy arrays saved in", output_path)
 
-    print("Numpy arrays saved in {}".format(output_path))
-
-if __name__ == "main":
+if __name__ == "__main__":
+    print("convert_imgs_npz")
     convert_imgs_npz(IMG_DIR, IMG_NPZ_DIR)

@@ -34,23 +34,42 @@ def run(output_path=MODEL_DIR,
     if pretrained_model is not None:
         model.model.load_weights(pretrained_model)
     df_train = loadData('df_train.pkl')
-    train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=True)
+    train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=False)
     df_valid = loadData('df_valid.pkl')
     valid_generator = Generator.data_generator(df_valid, input_shape, BATCH_SIZE)
     model.fit(train_generator, 
               BATCH_SIZE,
               steps_per_epoch,
               valid_generator,
-              2,
+              1,
               checkpoint)
 
+    # df_train = loadData('df_train.pkl')
+    # train_dataset = Generator.generate_dataset(df_train, input_shape, BATCH_SIZE)
+    # print(f'input_images: {train_dataset[0].shape}')
+    # print(f'partial_sequences: {train_dataset[1].shape}')
+    # print(f'next_words: {train_dataset[2].shape}')
+    # df_valid = loadData('df_valid.pkl')
+    # valid_dataset = Generator.generate_dataset(df_valid, input_shape, BATCH_SIZE)
+
+    # model.fit(train_dataset[0],
+    #           train_dataset[1],
+    #           train_dataset[2],
+    #           BATCH_SIZE,
+    #           steps_per_epoch,
+    #           valid_dataset[0],
+    #           valid_dataset[1],
+    #           valid_dataset[2],
+    #           1,
+    #           checkpoint)
+
 if __name__ == "__main__":
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    # os.environ["CUDA_VISIBLE_DEVICES"] = ""
     tf.debugging.set_log_device_placement(False)
-    # tf.config.list_physical_devices('CPU')
-    # if tf.config.list_physical_devices('GPU'):
-    #     print("GPU is available")
-    #     print(tf.config.list_physical_devices('GPU'))
-    # else:
-    #     print("GPU is not available")
+    tf.config.list_physical_devices('GPU')
+    if tf.config.list_physical_devices('GPU'):
+        print("GPU is available")
+        print(tf.config.list_physical_devices('GPU'))
+    else:
+        print("GPU is not available")
     run()
