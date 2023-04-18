@@ -49,3 +49,6 @@ def convert_imgs_npz(input_path, output_path):
             assert np.array_equal(img, retrieve)
 
     print("Numpy arrays saved in {}".format(output_path))
+
+if __name__ == "main":
+    convert_imgs_npz(IMG_DIR, IMG_NPZ_DIR)
