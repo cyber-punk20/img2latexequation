@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from __future__ import print_function
 from __future__ import absolute_import
 
@@ -20,8 +19,9 @@ def run(output_path=MODEL_DIR,
         dataset_info_path=TRAIN_DATASET_INFO_PATH, 
         is_memory_intensive=False, 
         pretrained_model=None):
-    strategy = tf.distribute.MultiWorkerMirroredStrategy()
     np.random.seed(1234)
+    strategy = tf.distribute.MultiWorkerMirroredStrategy()
+    
     with open(dataset_info_path) as f:
         dataset_info = json.load(f)
     input_shape = tuple(dataset_info["input_shape"])
@@ -40,39 +40,39 @@ def run(output_path=MODEL_DIR,
         model.model.load_weights(pretrained_model)
 
 
-    df_train = loadData('df_train.pkl')
-    train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=False)
-    # dist_train_dataset = strategy.experimental_distribute_dataset(Generator.create_distributed_dataset_from_generator(df_train, input_shape, BATCH_SIZE, verbose=False))
+    # df_train = loadData('df_train.pkl')
+    # train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=False)
 
 
-    df_valid = loadData('df_valid.pkl')
-    valid_generator = Generator.data_generator(df_valid, input_shape, BATCH_SIZE)
+    # df_valid = loadData('df_valid.pkl')
+    # valid_generator = Generator.data_generator(df_valid, input_shape, BATCH_SIZE)
     
 
 
-    model.fit(train_generator, 
-              BATCH_SIZE,
-              steps_per_epoch,
-              valid_generator,
-              2,
-              checkpoint)
-
-
-    # df_train = loadData('df_train.pkl')
-    # dist_train_dataset = strategy.experimental_distribute_dataset(Generator.create_distributed_dataset_from_generator(df_train, input_shape, BATCH_SIZE, verbose=False))
-    # df_valid = loadData('df_valid.pkl')
-    # dist_valid_dataset = strategy.experimental_distribute_dataset(Generator.create_distributed_dataset_from_generator(df_valid, input_shape, BATCH_SIZE, verbose=False))
-
-    # model.fit(dist_train_dataset, 
+    # model.fit(train_generator, 
     #           BATCH_SIZE,
     #           steps_per_epoch,
-    #           dist_valid_dataset,
+    #           valid_generator,
     #           2,
     #           checkpoint)
+
+
+    df_train = loadData('df_train.pkl')
+    dist_train_dataset = strategy.experimental_distribute_dataset(Generator.create_distributed_dataset_from_generator(df_train, input_shape, BATCH_SIZE, verbose=False))
+    df_valid = loadData('df_valid.pkl')
+    dist_valid_dataset = strategy.experimental_distribute_dataset(Generator.create_distributed_dataset_from_generator(df_valid, input_shape, BATCH_SIZE, verbose=False))
+
+    model.fit(dist_train_dataset, 
+              BATCH_SIZE,
+              steps_per_epoch,
+              dist_valid_dataset,
+              2,
+              checkpoint)
 
 if __name__ == "__main__":
     # os.environ["CUDA_VISIBLE_DEVICES"] = ""
     K.clear_session()
+    os.environ["TF_GRPC_DEFAULT_OPTIONS"] = "grpc.max_send_message_length=2147483647,grpc.max_receive_message_length=2147483647,grpc.keepalive_time_ms=60000,grpc.keepalive_timeout_ms=20000,grpc.http2.min_time_between_pings_ms=10000,grpc.http2.min_ping_interval_without_data_ms=5000,grpc.http2.max_pings_without_data=0,grpc.http2.min_recv_ping_interval_without_data_ms=10000"
     tf.debugging.set_log_device_placement(False)
     tf.config.list_physical_devices('GPU')
     if tf.config.list_physical_devices('GPU'):
@@ -80,61 +80,4 @@ if __name__ == "__main__":
         print(tf.config.list_physical_devices('GPU'))
     else:
         print("GPU is not available")
-=======
-from __future__ import print_function
-from __future__ import absolute_import
-
-import tensorflow as tf
-
-import sys
-
-from preprocessing import *
-from pix2equation import *
-from Generator import *
-
-import os
-
-def run(output_path=MODEL_DIR, 
-        checkpoint_path=CHECKPOINT_PATH,
-        dataset_info_path=TRAIN_DATASET_INFO_PATH, 
-        is_memory_intensive=False, 
-        pretrained_model=None):
-    np.random.seed(1234)
-    with open(dataset_info_path) as f:
-        dataset_info = json.load(f)
-    input_shape = tuple(dataset_info["input_shape"])
-    output_size = dataset_info["output_size"]
-    steps_per_epoch = int(dataset_info["size"] / BATCH_SIZE)
-
-    model = pix2equation(input_shape, output_size, output_path)
-    checkpoint = ModelCheckpoint(checkpoint_path, 
-                                 monitor='val_loss', 
-                                 verbose=1, 
-                                 save_best_only=True, 
-                                 mode='min')
-
-
-    if pretrained_model is not None:
-        model.model.load_weights(pretrained_model)
-    df_train = loadData('df_train.pkl')
-    train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=True)
-    df_valid = loadData('df_valid.pkl')
-    valid_generator = Generator.data_generator(df_valid, input_shape, BATCH_SIZE)
-    model.fit(train_generator, 
-              BATCH_SIZE,
-              steps_per_epoch,
-              valid_generator,
-              2,
-              checkpoint)
-
-if __name__ == "__main__":
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
-    tf.debugging.set_log_device_placement(False)
-    # tf.config.list_physical_devices('CPU')
-    # if tf.config.list_physical_devices('GPU'):
-    #     print("GPU is available")
-    #     print(tf.config.list_physical_devices('GPU'))
-    # else:
-    #     print("GPU is not available")
->>>>>>> a6e02871f896657dea405dcd8ae5587a1f0b89cf
     run()

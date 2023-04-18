@@ -13,4 +13,4 @@
 chmod +x train.sh
 
 # Run the distributed training using ibrun
-mpiexec.hydra -hostfile ./hostfile -np 3 ./train.sh
+mpiexec.hydra -hostfile ./hostfile -np 3 -ppn 1 ./train.sh
