@@ -17,7 +17,7 @@ CHECKPOINT_PATH = './models/model_checkpoint.h5'
 
 WORD2ID_FILENAME = 'dict_vocab.pkl'
 ID2WORD_FILENAME = 'dict_id2word.pkl'
-BATCH_SIZE = 192
+BATCH_SIZE = 512
 UNIQUE_IDX_OFFSET = 2000000
 
 

@@ -75,11 +75,14 @@ class pix2equation(BasicModel):
             decoder = Dense(output_size, activation='softmax')(decoder)
 
             self.model = Model(inputs=[visual_input, textual_input], outputs=decoder)
+            if not os.path.exists(checkpoint_path):
+                os.makedirs(checkpoint_path)
             self.checkpoint = ModelCheckpoint(checkpoint_path, 
                                               monitor='val_loss', 
                                               verbose=1, 
                                               save_best_only=True, 
-                                              mode='min')
+                                              mode='min',
+                                              save_format='tf')
             optimizer = RMSprop(learning_rate=0.0003, clipvalue=1.0)
             self.model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
