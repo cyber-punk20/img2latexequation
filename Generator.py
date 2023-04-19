@@ -10,6 +10,55 @@ from tensorflow.keras.utils import Sequence
 
 class Generator:
     @staticmethod
+    def single_example_generator(df, input_shape, img_npz_path=IMG_NPZ_DIR):
+        dataset = Dataset()
+        dataset.voc.loadVolcabulary()
+        dataset.voc.create_binary_representation()
+
+        for index, row in df.iterrows():
+            image = row['image']
+            image_name = image[:image.find(".png")]
+            if os.path.isfile("{}/{}.npz".format(img_npz_path, image_name)):
+                img = np.load("{}/{}.npz".format(img_npz_path, image_name))["features"]
+                pad_width = ((0, input_shape[0] - img.shape[0]), (0, 0), (0, 0))
+                img = np.pad(img, pad_width, mode='constant')
+            else:
+                continue
+            equ_token_id_seq = row['squashed_seq']
+            token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
+            token_id_sequence.extend(equ_token_id_seq)
+            token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
+            suffix = [dataset.voc.vocabulary[PLACEHOLDER]] * CONTEXT_LENGTH
+
+            a = np.concatenate([suffix, token_id_sequence])
+            for j in range(0, len(a) - CONTEXT_LENGTH):
+                context_ids = a[j:j + CONTEXT_LENGTH]
+                context_ids = Dataset.binarize_context_ids(context_ids, dataset.voc)
+                label_id = a[j + CONTEXT_LENGTH]
+                label_id = Dataset.sparsify_label(label_id, dataset.voc)
+
+                yield ((np.array(img), np.array(context_ids)), np.array(label_id))
+
+    @staticmethod
+    def data_generator_dist(df, input_shape, batch_size, img_npz_path=IMG_NPZ_DIR):
+        voc = Dataset().voc
+        voc.loadVolcabulary()
+        voc.create_binary_representation()
+        dataset = tf.data.Dataset.from_generator(
+            lambda: Generator.single_example_generator(df, input_shape, img_npz_path),
+            output_signature=(
+                (tf.TensorSpec(shape=input_shape, dtype=tf.float32),
+                 tf.TensorSpec(shape=(CONTEXT_LENGTH, len(voc.vocabulary)), dtype=tf.float32)),
+                 tf.TensorSpec(shape=(len(voc.vocabulary),), dtype=tf.float32)
+            )
+        )
+
+        dataset = dataset.shuffle(buffer_size=1000)
+        dataset = dataset.batch(batch_size)
+        dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+
+        return dataset
+    @staticmethod
     def generate_dataset(df, input_shape, batch_size,  
                          img_npz_path=IMG_NPZ_DIR):
         dataset = Dataset()

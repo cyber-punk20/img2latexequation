@@ -269,12 +269,23 @@ class Dataset:
         return temp
 
     @staticmethod
+    def binarize_context_ids(context_ids, voc):
+        sparse_vectors_sequence_id = []
+        for token_id in context_ids:
+            sparse_vectors_sequence_id.append(voc.binary_vocabulary[voc.token_lookup[token_id]])
+        return sparse_vectors_sequence_id
+
+    @staticmethod
     def sparsify_labels(next_word_ids, voc):
         temp = []
         for label_id in next_word_ids:
             temp.append(voc.binary_vocabulary[voc.token_lookup[label_id]])
 
         return temp
+
+    @staticmethod
+    def sparsify_label(next_word_id, voc):
+        return voc.binary_vocabulary[voc.token_lookup[next_word_id]]
 
 
 # def is_prime(n):

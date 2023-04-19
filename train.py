@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import tensorflow as tf
+from tensorflow.python.distribute import distribute_lib
 
 import sys
 
@@ -16,6 +17,7 @@ def run(output_path=MODEL_DIR,
         dataset_info_path=TRAIN_DATASET_INFO_PATH, 
         is_memory_intensive=False, 
         pretrained_model=None):
+    strategy = tf.distribute.MirroredStrategy()
     np.random.seed(1234)
     with open(dataset_info_path) as f:
         dataset_info = json.load(f)
@@ -23,26 +25,42 @@ def run(output_path=MODEL_DIR,
     output_size = dataset_info["output_size"]
     steps_per_epoch = int(dataset_info["size"] / BATCH_SIZE)
 
-    model = pix2equation(input_shape, output_size, output_path)
-    checkpoint = ModelCheckpoint(checkpoint_path, 
-                                 monitor='val_loss', 
-                                 verbose=1, 
-                                 save_best_only=True, 
-                                 mode='min')
+    model = pix2equation(input_shape, output_size, output_path, checkpoint_path, strategy)
+    
 
 
     if pretrained_model is not None:
         model.model.load_weights(pretrained_model)
+    # df_train = loadData('df_train.pkl')
+    # train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=False)
+    # df_valid = loadData('df_valid.pkl')
+    # valid_generator = Generator.data_generator(df_valid, input_shape, BATCH_SIZE)
+    # model.fit(train_generator, 
+    #           BATCH_SIZE,
+    #           steps_per_epoch,
+    #           EPOCHS,
+    #           valid_generator,
+    #           1)
+
     df_train = loadData('df_train.pkl')
-    train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=False)
+    train_generator = Generator.data_generator_dist(df_train, input_shape, BATCH_SIZE)
+
+    # for x, y in train_generator.take(1):
+    #     print("Visual input shape:", x[0].shape)
+    #     print("Textual input shape:", x[1].shape)
+    #     print("Output shape:", y.shape)
+
     df_valid = loadData('df_valid.pkl')
-    valid_generator = Generator.data_generator(df_valid, input_shape, BATCH_SIZE)
+    valid_generator = Generator.data_generator_dist(df_valid, input_shape, BATCH_SIZE)
+
+    
+
     model.fit(train_generator, 
               BATCH_SIZE,
               steps_per_epoch,
+              EPOCHS,
               valid_generator,
-              1,
-              checkpoint)
+              1)
 
     # df_train = loadData('df_train.pkl')
     # train_dataset = Generator.generate_dataset(df_train, input_shape, BATCH_SIZE)
