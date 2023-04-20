@@ -13,7 +13,7 @@ TEST_DATASET_DIR = './dataset_tmp/test_dataset'
 VALID_DATASET_DIR = './dataset_tmp/valid_dataset'
 
 MODEL_DIR = './models/'
-CHECKPOINT_PATH = './models/model_checkpoint.h5'
+CHECKPOINT_PATH = './models/model_checkpoint'
 
 WORD2ID_FILENAME = 'dict_vocab.pkl'
 ID2WORD_FILENAME = 'dict_id2word.pkl'
@@ -24,5 +24,5 @@ UNIQUE_IDX_OFFSET = 2000000
 # CONFIG FOR MODEL
 CONTEXT_LENGTH = 48
 IMG_SIZE = 128
-EPOCHS = 6
+EPOCHS = 3
 STEPS_PER_EPOCH = 72000

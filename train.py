@@ -3,6 +3,11 @@ from __future__ import absolute_import
 
 import tensorflow as tf
 from tensorflow.python.distribute import distribute_lib
+from tensorflow.keras.models import load_model
+
+
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
 
 import sys
 
@@ -16,7 +21,8 @@ def run(output_path=MODEL_DIR,
         checkpoint_path=CHECKPOINT_PATH,
         dataset_info_path=TRAIN_DATASET_INFO_PATH, 
         is_memory_intensive=False, 
-        pretrained_model=None):
+        pretrained_model=None,
+        trained=False):
     strategy = tf.distribute.MirroredStrategy()
     np.random.seed(1234)
     with open(dataset_info_path) as f:
@@ -24,13 +30,18 @@ def run(output_path=MODEL_DIR,
     input_shape = tuple(dataset_info["input_shape"])
     output_size = dataset_info["output_size"]
     steps_per_epoch = int(dataset_info["size"] / BATCH_SIZE)
-
+    # steps_per_epoch = 5
     model = pix2equation(input_shape, output_size, output_path, checkpoint_path, strategy)
     
 
 
     if pretrained_model is not None:
         model.model.load_weights(pretrained_model)
+    if trained:
+        model.load()
+        model.compile()
+        
+    # model.compile()
     # df_train = loadData('df_train.pkl')
     # train_generator = Generator.data_generator(df_train, input_shape, BATCH_SIZE, verbose=False)
     # df_valid = loadData('df_valid.pkl')
@@ -83,6 +94,7 @@ def run(output_path=MODEL_DIR,
 
 if __name__ == "__main__":
     # os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    tf.keras.backend.clear_session()
     tf.debugging.set_log_device_placement(False)
     tf.config.list_physical_devices('GPU')
     if tf.config.list_physical_devices('GPU'):
@@ -90,4 +102,9 @@ if __name__ == "__main__":
         print(tf.config.list_physical_devices('GPU'))
     else:
         print("GPU is not available")
-    run()
+    
+    # config = ConfigProto()
+    # config.gpu_options.allow_growth = True
+    # config.graph_options.optimizer_options.global_jit_level = tf.compat.v1.OptimizerOptions.ON_1
+    # session = InteractiveSession(config=config)
+    run(trained=True)

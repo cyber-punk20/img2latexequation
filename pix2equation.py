@@ -6,35 +6,44 @@ from keras.models import Sequential, Model, model_from_json
 from keras.optimizers import RMSprop
 from keras import *
 from keras.callbacks import ModelCheckpoint
+# from tensorflow.keras.layers import Input, Dense, Dropout, \
+#                          RepeatVector, LSTM, concatenate, \
+#                          Conv2D, MaxPooling2D, Flatten
+# from tensorflow.keras.models import Sequential, Model, model_from_json
+# from tensorflow.keras.optimizers import RMSprop
+# from tensorflow.keras.callbacks import ModelCheckpoint
 from constants import *
 
-
+import os
 class BasicModel:
-    def __init__(self, input_shape, output_size, output_dir):
+    def __init__(self, input_shape, output_size, output_dir, strategy):
         self.model = None
         self.input_shape = input_shape
         self.output_size = output_size
         self.output_path = output_dir
         self.name = ""
-
+        self.strategy = strategy
     def save(self):
-        model_json = self.model.to_json()
-        with open("{}/{}.json".format(self.output_path, self.name), "w") as json_file:
-            json_file.write(model_json)
-        self.model.save_weights("{}/{}.h5".format(self.output_path, self.name))
+        with self.strategy.scope():
+            model_json = self.model.to_json()
+            with open("{}/{}.json".format(self.output_path, self.name), "w") as json_file:
+                json_file.write(model_json)
+            self.model.save_weights("{}/{}_weights".format(self.output_path, self.name), save_format='tf')
 
     def load(self, name=""):
-        output_name = self.name if name == "" else name
-        with open("{}/{}.json".format(self.output_path, output_name), "r") as json_file:
-            loaded_model_json = json_file.read()
-        self.model = model_from_json(loaded_model_json)
-        self.model.load_weights("{}/{}.h5".format(self.output_path, output_name))
+        with self.strategy.scope():
+            output_name = self.name if name == "" else name
+            with open("{}/{}.json".format(self.output_path, output_name), "r") as json_file:
+                loaded_model_json = json_file.read()
+                self.model = model_from_json(loaded_model_json)
+                self.model.load_weights("{}/{}_weights".format(self.output_path, self.name))
 
 class pix2equation(BasicModel):
     def __init__(self, input_shape, output_size, output_dir, checkpoint_path, strategy):
-        super().__init__(input_shape, output_size, output_dir)
+        super().__init__(input_shape, output_size, output_dir, strategy)
         self.name = "pix2equation"
-        with strategy.scope():
+        
+        with self.strategy.scope():
             image_model = Sequential()
             image_model.add(Conv2D(32, (3, 3), padding='valid', activation='relu', input_shape=input_shape))
             image_model.add(Conv2D(32, (3, 3), padding='valid', activation='relu'))
@@ -85,16 +94,20 @@ class pix2equation(BasicModel):
                                               save_format='tf')
             optimizer = RMSprop(learning_rate=0.0003, clipvalue=1.0)
             self.model.compile(loss='categorical_crossentropy', optimizer=optimizer)
-
+    def compile(self):
+        with self.strategy.scope():
+            optimizer = RMSprop(learning_rate=0.0003, clipvalue=1.0)
+            self.model.compile(loss='categorical_crossentropy', optimizer=optimizer)
     def fit(self, train_generator, batch_size, steps_per_epoch, epochs, valid_generator, validation_steps):
+        # with self.strategy.scope():
         self.model.fit(train_generator, 
-              batch_size=batch_size,
-              steps_per_epoch=steps_per_epoch,
-              epochs=epochs,
-              validation_data=valid_generator,
-              validation_steps=validation_steps,
-              callbacks=[self.checkpoint],
-              verbose=1)
+            batch_size=batch_size,
+            steps_per_epoch=steps_per_epoch,
+            epochs=epochs,
+            validation_data=valid_generator,
+            validation_steps=validation_steps,
+            callbacks=[self.checkpoint],
+            verbose=1)
         self.save()
 
     # def fit(self, images, partial_captions, next_words, batch_size, steps_per_epoch, v_images, v_partial_captions, v_next_words, validation_steps, checkpoint):
