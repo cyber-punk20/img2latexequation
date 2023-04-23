@@ -7,14 +7,14 @@ import sys
 from constants import *
 
 
-PLACEHOLDER = " "
-START_TOKEN = '\\bos'
-END_TOKEN = '\\eos'
 
 def loadData(filename: str)-> pd.DataFrame:
     df = pd.read_pickle(os.path.join(DATA_DIR, filename))
     # print(df['seq_len'].equals(df['squashed_len']))
     return df.sort_index()
+
+def saveData(filename: str, df: pd.DataFrame):
+    df.to_pickle(os.path.join(DATA_DIR, filename))
 
 class Vocabulary:
     def __init__(self):
@@ -162,6 +162,13 @@ class Dataset:
             np.save(os.path.join(output_dir, f'next_word_ids_part_{i}.npy'), self.next_word_ids[start_idx:end_idx])
             np.save(os.path.join(output_dir, f'ids_part_{i}.npy'), self.ids[start_idx:end_idx])
 
+    @staticmethod
+    def squashed_seq_to_token_list(seq, voc):
+        res = []
+        for id in seq:
+            res.append(voc.token_lookup[id])
+        return res
+
     def preprocess(self, df, first_index, 
                    output_dir,
                    img_npz_path=IMG_NPZ_DIR, 
@@ -232,9 +239,10 @@ class Dataset:
             pic = img * 255
             pic = np.array(pic, dtype=np.uint8)
             Dataset.show(pic)
-        token_id_sequence = [self.voc.vocabulary[START_TOKEN]]
-        token_id_sequence.extend(equ_token_id_seq)
-        token_id_sequence.append(self.voc.vocabulary[END_TOKEN])
+        # token_id_sequence = [self.voc.vocabulary[START_TOKEN]]
+        # token_id_sequence.extend(equ_token_id_seq)
+        token_id_sequence = equ_token_id_seq
+        # token_id_sequence.append(self.voc.vocabulary[END_TOKEN])
         suffix = [self.voc.vocabulary[PLACEHOLDER]] * CONTEXT_LENGTH
         a = np.concatenate([suffix, token_id_sequence])
         for j in range(0, len(a) - CONTEXT_LENGTH):
@@ -299,19 +307,20 @@ class Dataset:
 
 
 if __name__ == '__main__':
-    df_train = loadData('df_train.pkl')
+    
+    df_train = loadData('my_df_train.pkl')
     print(df_train)
     dataset = Dataset()
     dataset.save_dataset_info(df_train, 0, 
                               dataset_info_path=TRAIN_DATASET_INFO_PATH)
 
-    df_test = loadData('df_test.pkl')
+    df_test = loadData('my_df_test.pkl')
     print(df_test)
     dataset = Dataset()
     dataset.save_dataset_info(df_test, 0, 
                               dataset_info_path=TEST_DATASET_INFO_PATH)
     
-    df_valid = loadData('df_valid.pkl')
+    df_valid = loadData('my_df_valid.pkl')
     print(df_valid)
     dataset = Dataset()
     dataset.save_dataset_info(df_valid, 0, 

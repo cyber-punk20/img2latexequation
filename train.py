@@ -30,7 +30,7 @@ def run(output_path=MODEL_DIR,
     input_shape = tuple(dataset_info["input_shape"])
     output_size = dataset_info["output_size"]
     steps_per_epoch = int(dataset_info["size"] / BATCH_SIZE)
-    # steps_per_epoch = 5
+    # steps_per_epoch = 1
     model = pix2equation(input_shape, output_size, output_path, checkpoint_path, strategy)
     
 
@@ -53,7 +53,7 @@ def run(output_path=MODEL_DIR,
     #           valid_generator,
     #           1)
 
-    df_train = loadData('df_train.pkl')
+    df_train = loadData('my_df_train.pkl')
     train_generator = Generator.data_generator_dist(df_train, input_shape, BATCH_SIZE)
 
     # for x, y in train_generator.take(1):
@@ -61,7 +61,7 @@ def run(output_path=MODEL_DIR,
     #     print("Textual input shape:", x[1].shape)
     #     print("Output shape:", y.shape)
 
-    df_valid = loadData('df_valid.pkl')
+    df_valid = loadData('my_df_valid.pkl')
     valid_generator = Generator.data_generator_dist(df_valid, input_shape, BATCH_SIZE)
 
     

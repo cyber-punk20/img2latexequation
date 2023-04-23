@@ -26,9 +26,10 @@ class Generator:
                 else:
                     continue
                 equ_token_id_seq = row['squashed_seq']
-                token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
-                token_id_sequence.extend(equ_token_id_seq)
-                token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
+                # token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
+                # token_id_sequence.extend(equ_token_id_seq)
+                token_id_sequence = equ_token_id_seq
+                # token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
                 suffix = [dataset.voc.vocabulary[PLACEHOLDER]] * CONTEXT_LENGTH
 
                 a = np.concatenate([suffix, token_id_sequence])
@@ -80,9 +81,10 @@ class Generator:
             else:
                 continue
             equ_token_id_seq = row['squashed_seq']
-            token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
-            token_id_sequence.extend(equ_token_id_seq)
-            token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
+            # token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
+            # token_id_sequence.extend(equ_token_id_seq)
+            token_id_sequence = equ_token_id_seq
+            # token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
             suffix = [dataset.voc.vocabulary[PLACEHOLDER]] * CONTEXT_LENGTH
 
             a = np.concatenate([suffix, token_id_sequence])
@@ -124,9 +126,9 @@ class Generator:
                 else:
                     continue
                 equ_token_id_seq = row['squashed_seq']
-                token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
-                token_id_sequence.extend(equ_token_id_seq)
-                token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
+                # token_id_sequence = [dataset.voc.vocabulary[START_TOKEN]]
+                token_id_sequence = equ_token_id_seq
+                # token_id_sequence.append(dataset.voc.vocabulary[END_TOKEN])
                 suffix = [dataset.voc.vocabulary[PLACEHOLDER]] * CONTEXT_LENGTH
 
                 a = np.concatenate([suffix, token_id_sequence])
