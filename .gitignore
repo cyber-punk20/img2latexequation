@@ -3,3 +3,4 @@ models/
 models copy/
 models 8 epochs/
 models 10 epochs/
+single_node_train.log

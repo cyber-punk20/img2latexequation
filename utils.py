@@ -67,6 +67,38 @@ def convert_imgs_npz(input_path, output_path):
             assert np.array_equal(img, retrieve)
     print("Numpy arrays saved in", output_path)
 
+def check_img_height(input_path, img_height):
+    import cv2
+    for f in os.listdir(input_path):
+        if f.endswith(".png"):
+            file_name = f[:f.find(".png")]
+            img_path = os.path.join(input_path, f)
+            img = cv2.imread(img_path)
+            # print(img_path)
+            if img is None or img.size == 0:
+                print(f"Failed to load image from path: {img_path}")
+                continue
+            (h, w) = img.shape[:2]
+            if h != img_height:
+                print(f"{img_path} with height {h} does not have height {img_height}")
+                break
+
+def check_img_width(input_path, img_width):
+    import cv2
+    for f in os.listdir(input_path):
+        if f.endswith(".png"):
+            file_name = f[:f.find(".png")]
+            img_path = os.path.join(input_path, f)
+            img = cv2.imread(img_path)
+            # print(img_path)
+            if img is None or img.size == 0:
+                print(f"Failed to load image from path: {img_path}")
+                continue
+            (h, w) = img.shape[:2]
+            if w != img_width:
+                print(f"{img_path} with width {w} does not have width {img_width}")
+                break
+
 def convert_df(df, dataset):
     for index, row in df.iterrows():
         equ_token_id_seq = row['squashed_seq']
@@ -83,6 +115,10 @@ if __name__ == "__main__":
     dataset = Dataset()
     dataset.voc.loadVolcabulary()
     dataset.voc.create_binary_representation()
+
+    # check_img_width(IMG_DIR, 128)
+    df_test = loadData('df_test.pkl')
+    print(df_test)
 
 
     if process_img:
@@ -103,24 +139,24 @@ if __name__ == "__main__":
         convert_df(df_train, dataset)
         saveData('my_df_train.pkl', df_train)
 
-    df = loadData('my_df_test.pkl')
-    seq = df.iloc[0]['squashed_seq']
-    print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
-    df = loadData('df_test.pkl')
-    seq = df.iloc[0]['squashed_seq']
-    print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
+    # df = loadData('my_df_test.pkl')
+    # seq = df.iloc[0]['squashed_seq']
+    # print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
+    # df = loadData('df_test.pkl')
+    # seq = df.iloc[0]['squashed_seq']
+    # print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
 
-    df = loadData('my_df_valid.pkl')
-    seq = df.iloc[0]['squashed_seq']
-    print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
-    df = loadData('df_valid.pkl')
-    seq = df.iloc[0]['squashed_seq']
-    print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
+    # df = loadData('my_df_valid.pkl')
+    # seq = df.iloc[0]['squashed_seq']
+    # print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
+    # df = loadData('df_valid.pkl')
+    # seq = df.iloc[0]['squashed_seq']
+    # print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
 
-    df = loadData('my_df_train.pkl')
-    seq = df.iloc[0]['squashed_seq']
-    print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
-    df = loadData('df_train.pkl')
-    seq = df.iloc[0]['squashed_seq']
-    print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
+    # df = loadData('my_df_train.pkl')
+    # seq = df.iloc[0]['squashed_seq']
+    # print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
+    # df = loadData('df_train.pkl')
+    # seq = df.iloc[0]['squashed_seq']
+    # print(' '.join([dataset.voc.token_lookup[id] for id in seq]))
         

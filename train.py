@@ -29,7 +29,7 @@ def run(output_path=MODEL_DIR,
         dataset_info = json.load(f)
     input_shape = tuple(dataset_info["input_shape"])
     output_size = dataset_info["output_size"]
-    steps_per_epoch = int(dataset_info["size"] / BATCH_SIZE)
+    steps_per_epoch = int(dataset_info["size"] / BATCH_SIZE / 5)
     # steps_per_epoch = 1
     model = pix2equation(input_shape, output_size, output_path, checkpoint_path, strategy)
     
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     # config.gpu_options.allow_growth = True
     # config.graph_options.optimizer_options.global_jit_level = tf.compat.v1.OptimizerOptions.ON_1
     # session = InteractiveSession(config=config)
-    run(trained=True)
+    run(trained=False)
